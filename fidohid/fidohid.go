@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os/user"
+	"strconv"
 
 	"github.com/psanford/tpm-fido/fidoauth"
 	"github.com/psanford/uhid"
@@ -22,6 +24,18 @@ func New(ctx context.Context, name string) (*SoftToken, error) {
 	d.Data.Bus = busUSB
 	d.Data.VendorID = vendorID
 	d.Data.ProductID = productID
+
+	u, err := user.Current()
+	if err != nil {
+		return nil, err
+	}
+
+	uid, err := strconv.ParseUint(u.Uid, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	d.Data.Country = uint32(uid)
 
 	evtChan, err := d.Open(ctx)
 	if err != nil {

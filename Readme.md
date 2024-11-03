@@ -2,7 +2,7 @@
 
 tpm-fido is FIDO token implementation for Linux that protects the token keys by using your system's TPM. tpm-fido uses Linux's [uhid](https://github.com/psanford/uhid) facility to emulate a USB HID device so that it is properly detected by browsers.
 
-##  Implementation details
+## Implementation details
 
 tpm-fido uses the TPM 2.0 API. The overall design is as follows:
 
@@ -43,6 +43,14 @@ To run:
 ./tpm-fido
 ```
 Note: do not run with `sudo` or as root, as it will not work.
+
+## Multiseat support
+In order to use `tpm-fido` with multiple users/seats (via `loginctl`), create `/etc/udev/rules.d/70-tpm-fido.rules` with the following content:
+```
+SUBSYSTEM=="hidraw", KERNELS=="0003:15D9:0A37.*", IMPORT{parent}="HID_NAME"
+SUBSYSTEM=="hidraw", ENV{HID_NAME}=="tpm-fido", ENV{ID_PATH_TAG}=="", ENV{ID_PATH_TAG}="$env{HID_NAME}-$attr{country}"
+```
+Then you'll be able to `loginctl assign` the device to whatever seat you need.
 
 ## Dependencies
 
